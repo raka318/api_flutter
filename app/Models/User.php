@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    // Mengaktifkan fitur token API Sanctum
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
@@ -32,10 +33,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi satu User memiliki banyak daftar film Watchlist.
+     * Relasi One-to-Many: satu user memiliki banyak kategori.
      */
-    public function watchlists(): HasMany
+    public function categories(): HasMany
     {
-        return $this->hasMany(Watchlist::class);
+        return $this->hasMany(Category::class);
+    }
+
+    /**
+     * Relasi One-to-Many: satu user memiliki banyak item koleksi.
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class);
     }
 }
