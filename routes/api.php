@@ -1,25 +1,25 @@
-<?php
+    <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+    use App\Http\Controllers\Api\AuthController;
+    use App\Http\Controllers\Api\WatchlistController;
+    use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Route;
 
+    // Endpoint autentikasi publik (tanpa token)
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+    // Endpoint yang dilindungi Laravel Sanctum (wajib membawa Bearer Token)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+        Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
-
-    Route::apiResource('articles', \App\Http\Controllers\Api\ArticleController::class);
-});
-
-Route::get('/media/{path}', function (string $path) {
-    abort_unless(str_starts_with($path, 'articles/'), 404);
-    abort_unless(Storage::disk('public')->exists($path), 404);
-
-    return Storage::disk('public')->response($path);
-})->where('path', '.*');
+        // CRUD Watchlist Studio Ghibli
+        Route::get('/watchlists', [WatchlistController::class, 'index']);
+        Route::post('/watchlists', [WatchlistController::class, 'store']);
+        Route::put('/watchlists/{id}', [WatchlistController::class, 'update']);
+        Route::delete('/watchlists/{id}', [WatchlistController::class, 'destroy']);
+    }); 
